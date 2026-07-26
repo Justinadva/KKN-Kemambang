@@ -9,6 +9,9 @@ import TotalEnergyCard from "@/components/TotalEnergyCard";
 import CO2SavingsCard from "@/components/CO2SavingsCard";
 import BankSampahCalculator, { ActivityEntry } from "@/components/BankSampahCalculator";
 import ActivityLog from "@/components/ActivityLog";
+import WasteSummaryCards from "@/components/WasteSummaryCards";
+import KeuanganTransparansi from "@/components/KeuanganTransparansi";
+import SalesChart from "@/components/SalesChart";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ── Seed energy milestone entries (shown on first load for PLTS tab) ──
@@ -36,13 +39,32 @@ const SEED_ENTRIES: ActivityEntry[] = [
   },
 ];
 
+interface SummaryData {
+  perType: { waste_type_name: string; total_kg: number; total_buy_value: number; transaction_count: number }[];
+  totals: { total_kg: number; total_buy_value: number; transaction_count: number; total_surplus: number };
+  kas_balance: number;
+  pending: {
+    id: number; waste_type_name: string; weight_kg: number;
+    buy_price_per_kg: number; sell_price_per_kg: number;
+    total_buy_value: number; created_at: string;
+  }[];
+  kasHistory: {
+    id: number; type: "pemasukan" | "pengeluaran"; amount: number;
+    description: string; balance_after: number; created_at: string;
+    waste_type_name?: string; weight_kg?: number;
+  }[];
+}
+
 type ActiveTab = "plts" | "bank-sampah";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("plts");
   const [activityEntries, setActivityEntries] = useState<ActivityEntry[]>([]);
+  const [summary, setSummary] = useState<SummaryData | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(true);
+  const [chartRefreshKey, setChartRefreshKey] = useState(0);
 
-  // Load from localStorage on mount; seed energi entries if empty
+  // Load PLTS from localStorage on mount; seed energi entries if empty
   useEffect(() => {
     try {
       const stored = JSON.parse(
@@ -54,16 +76,34 @@ export default function Home() {
     }
   }, []);
 
+  const fetchSummary = useCallback(async () => {
+    try {
+      setSummaryLoading(true);
+      const res = await fetch("/api/summary");
+      const data = await res.json();
+      setSummary(data);
+    } finally {
+      setSummaryLoading(false);
+    }
+  }, []);
+
+  // Fetch summary when bank-sampah tab is active
+  useEffect(() => {
+    if (activeTab === "bank-sampah") fetchSummary();
+  }, [activeTab, fetchSummary]);
+
   const handleSetor = useCallback((entry: ActivityEntry) => {
     setActivityEntries((prev) => {
       const next = [entry, ...prev];
       localStorage.setItem("plts-activity-log", JSON.stringify(next.slice(0, 50)));
       return next;
     });
-  }, []);
+    // Refresh summary + chart after new deposit
+    fetchSummary();
+    setChartRefreshKey((k) => k + 1);
+  }, [fetchSummary]);
 
   const handleClearLog = useCallback(() => {
-    // Only clear entries matching the current tab context
     setActivityEntries((prev) => {
       const filtered = prev.filter((e) =>
         activeTab === "plts" ? e.type !== "energi" : e.type !== "sampah"
@@ -136,7 +176,7 @@ export default function Home() {
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
-                {/* Page header — no hero */}
+                {/* Page header */}
                 <div className="mb-6">
                   <motion.div
                     initial={{ opacity: 0, y: 12 }}
@@ -153,14 +193,30 @@ export default function Home() {
                     transition={{ delay: 0.1 }}
                     className="mt-1.5 text-sm text-[#6B7280] ml-11"
                   >
-                    Kalkulator setoran sampah dan konversi estimasi saldo anggota KKN-T 40 Kemambang.
+                    Manajemen setoran, transparansi kas, dan statistik sampah terkumpul — KKN-T 40 Kemambang.
                   </motion.p>
                 </div>
 
-                {/* Calculator + Summary grid */}
+                {/* ── SUMMARY CHARTS ── */}
+                {summaryLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="w-6 h-6 border-2 border-[#003E87] border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : (
+                  <WasteSummaryCards
+                    perType={summary?.perType ?? []}
+                    totalKg={summary?.totals?.total_kg ?? 0}
+                    totalBuyValue={summary?.totals?.total_buy_value ?? 0}
+                  />
+                )}
+
+                {/* ── CALCULATOR + HARGA GUIDE ── */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-2">
                   {/* Kalkulator */}
-                  <BankSampahCalculator onSetor={handleSetor} />
+                  <BankSampahCalculator
+                    onSetor={handleSetor}
+                    onTypesChanged={fetchSummary}
+                  />
 
                   {/* Ringkasan card */}
                   <motion.div
@@ -175,10 +231,10 @@ export default function Home() {
 
                     <div className="grid grid-cols-2 gap-3">
                       {[
-                        { label: "Total Setoran",   value: "142 kg",     color: "#003E87" },
-                        { label: "Total Saldo",      value: "Rp 487.500", color: "#22C55E" },
-                        { label: "Anggota Aktif",    value: "87 orang",   color: "#8B5CF6" },
-                        { label: "Kurangi CO₂",     value: "71.2 kg",    color: "#F59E0B" },
+                        { label: "Total Setoran", value: `${(summary?.totals?.total_kg ?? 0).toFixed(1)} kg`, color: "#003E87" },
+                        { label: "Total ke Anggota", value: `Rp ${(summary?.totals?.total_buy_value ?? 0).toLocaleString("id-ID")}`, color: "#22C55E" },
+                        { label: "Jumlah Transaksi", value: `${summary?.totals?.transaction_count ?? 0}×`, color: "#8B5CF6" },
+                        { label: "Surplus Terealisasi", value: `Rp ${(summary?.totals?.total_surplus ?? 0).toLocaleString("id-ID")}`, color: "#F59E0B" },
                       ].map((item) => (
                         <div
                           key={item.label}
@@ -193,33 +249,41 @@ export default function Home() {
                       ))}
                     </div>
 
-                    {/* Price guide */}
+                    {/* Price guide — now from DB */}
                     <div>
                       <p className="text-xs font-semibold text-[#6B7280] mb-3">
-                        Harga per Kilogram
+                        Harga Aktif (dari database)
                       </p>
-                      <div className="flex flex-col gap-2">
-                        {[
-                          { type: "🧴 Plastik",       price: "Rp 3.500/kg" },
-                          { type: "📦 Kertas/Kardus",  price: "Rp 2.000/kg" },
-                          { type: "⚙️ Logam/Besi",     price: "Rp 8.000/kg" },
-                          { type: "🍶 Kaca/Botol",     price: "Rp 1.500/kg" },
-                          { type: "🌿 Organik",        price: "Rp 500/kg"   },
-                        ].map((item) => (
-                          <div
-                            key={item.type}
-                            className="flex items-center justify-between text-xs py-1.5 border-b border-black/4 last:border-0"
-                          >
-                            <span className="text-[#000000]">{item.type}</span>
-                            <span className="font-bold text-[#003E87]">{item.price}</span>
-                          </div>
-                        ))}
+                      <div className="flex flex-col gap-0">
+                        {/* Header */}
+                        <div className="flex items-center px-2 py-1.5 text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider border-b border-black/6">
+                          <span className="flex-1">Jenis</span>
+                          <span className="w-24 text-right">Beli Warga</span>
+                          <span className="w-24 text-right">Jual Pengepul</span>
+                        </div>
+                        {(summary?.perType ?? []).length === 0 && (
+                          <p className="text-xs text-[#6B7280] py-3 text-center">Belum ada data</p>
+                        )}
                       </div>
                     </div>
                   </motion.div>
                 </div>
 
-                {/* Bank Sampah Activity Log */}
+                {/* ── TRANSPARANSI KEUANGAN ── */}
+                {!summaryLoading && summary && (
+                  <KeuanganTransparansi
+                    kasBalance={summary.kas_balance}
+                    totalSurplus={summary.totals?.total_surplus ?? 0}
+                    pending={summary.pending}
+                    kasHistory={summary.kasHistory}
+                    onSellSuccess={() => { fetchSummary(); setChartRefreshKey((k) => k + 1); }}
+                  />
+                )}
+
+                {/* ── GRAFIK PENJUALAN ── */}
+                <SalesChart refreshKey={chartRefreshKey} />
+
+                {/* ── LOG SETORAN ── */}
                 <ActivityLog
                   entries={activityEntries}
                   activeTab="bank-sampah"
@@ -239,7 +303,7 @@ export default function Home() {
             © 2026 KKN-T 40 Kemambang · DEB Kembara — Dashboard PLTS &amp; Bank Sampah
           </p>
           <p className="text-xs text-[#6B7280]">
-            Diperbarui otomatis setiap 5 menit · v1.1.0
+            Diperbarui otomatis setiap 5 menit · v2.0.0
           </p>
         </div>
       </footer>
