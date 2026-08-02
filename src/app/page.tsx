@@ -3,15 +3,12 @@
 import { useState, useCallback, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
-import CurrentPowerCard from "@/components/CurrentPowerCard";
-import EnergyBalanceCard from "@/components/EnergyBalanceCard";
-import TotalEnergyCard from "@/components/TotalEnergyCard";
-import CO2SavingsCard from "@/components/CO2SavingsCard";
 import BankSampahCalculator, { ActivityEntry } from "@/components/BankSampahCalculator";
 import ActivityLog from "@/components/ActivityLog";
 import WasteSummaryCards from "@/components/WasteSummaryCards";
 import KeuanganTransparansi from "@/components/KeuanganTransparansi";
 import SalesChart from "@/components/SalesChart";
+import IotPLTSMonitor from "@/components/IotPLTSMonitor";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ── Seed energy milestone entries (shown on first load for PLTS tab) ──
@@ -137,24 +134,23 @@ export default function Home() {
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
-                {/* Hero */}
+                {/* Hero — compact on mobile */}
                 <HeroSection />
 
-                {/* Section heading */}
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="h-1 w-8 bg-[#FED501] rounded-full" />
-                  <h2 className="text-lg font-bold text-[#000000]">Widget Monitoring</h2>
-                  <div className="h-px flex-1 bg-black/6" />
-                  <span className="text-xs text-[#6B7280] font-medium">4 widget aktif</span>
+                {/* ── IoT Monitoring Section ── */}
+                <div className="flex flex-wrap items-center gap-3 mb-5">
+                  <div className="h-1 w-8 bg-[#FED501] rounded-full flex-shrink-0" />
+                  <h2 className="text-base sm:text-lg font-bold text-[#000000]">
+                    Monitoring IoT PLTS
+                  </h2>
+                  <div className="h-px flex-1 bg-black/6 hidden sm:block" />
+                  <span className="text-xs text-[#6B7280] font-medium bg-[#003E87]/8 px-2.5 py-1 rounded-full">
+                    5 parameter aktif
+                  </span>
                 </div>
 
-                {/* 4 energy cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-                  <CurrentPowerCard />
-                  <EnergyBalanceCard />
-                  <TotalEnergyCard />
-                  <CO2SavingsCard />
-                </div>
+                {/* IoT 5-parameter monitor */}
+                <IotPLTSMonitor />
 
                 {/* Energy Activity Log */}
                 <ActivityLog

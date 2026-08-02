@@ -12,7 +12,7 @@ const stats = [
 
 export default function HeroSection() {
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#003E87] via-[#0050B3] to-[#0064D9] p-8 mb-8">
+    <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#003E87] via-[#0050B3] to-[#0064D9] p-5 sm:p-8 mb-6 sm:mb-8">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-16 -right-16 w-80 h-80 rounded-full bg-white/5 blur-3xl" />
@@ -47,7 +47,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.08 }}
-            className="text-3xl sm:text-4xl font-extrabold text-white leading-tight mb-3"
+            className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight mb-3"
           >
             Here&apos;s Your{" "}
             <span className="text-[#FED501] relative">

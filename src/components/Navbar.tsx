@@ -28,7 +28,7 @@ export default function Navbar({ activeTab, onTabChange }: NavbarProps) {
             {/* KKN-T 40 Kemambang circular logo */}
             <div className="relative w-10 h-10 rounded-full overflow-hidden ring-2 ring-[#003E87]/20 flex-shrink-0">
               <Image
-                src="/logo-kknt.png"
+                src="/logo-kknt.svg"
                 alt="Logo KKN-T 40 Kemambang"
                 fill
                 sizes="40px"
