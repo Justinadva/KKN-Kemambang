@@ -101,7 +101,7 @@ export default function BankSampahCalculator({ onSetor, onTypesChanged }: BankSa
         onUpdated={handleTypesChanged}
       />
 
-      <DashboardCard title="Bank Sampah Calculator" badge="Interaktif" badgeColor="yellow" delay={0.25} className="col-span-1 md:col-span-2 lg:col-span-2">
+      <DashboardCard title="Kalkulator Setoran" badge="Interaktif" badgeColor="yellow" delay={0.25} className="col-span-1 md:col-span-2 lg:col-span-2">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row gap-3">
             {/* Waste type dropdown */}

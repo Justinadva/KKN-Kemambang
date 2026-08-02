@@ -219,61 +219,63 @@ export default function SalesChart({ refreshKey }: { refreshKey: number }) {
 
       <div className="card overflow-hidden">
         {/* Controls */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-6 py-4 border-b border-black/6">
-          {/* Mode tabs */}
-          <div className="flex gap-1 bg-black/5 rounded-xl p-1">
-            {(
-              [
-                { key: "overview", label: "Overview", icon: <Layers className="w-3.5 h-3.5" /> },
-                { key: "penjualan", label: "Penjualan", icon: <TrendingUp className="w-3.5 h-3.5" /> },
-                { key: "jenis", label: "Per Jenis", icon: <BarChart2 className="w-3.5 h-3.5" /> },
-              ] as { key: ChartMode; label: string; icon: React.ReactNode }[]
-            ).map((m) => (
-              <button
-                key={m.key}
-                onClick={() => setMode(m.key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  mode === m.key
-                    ? "bg-white text-[#000000] shadow-sm"
-                    : "text-[#6B7280] hover:text-[#000000]"
-                }`}
-              >
-                {m.icon}
-                {m.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Period toggle */}
+        <div className="flex flex-col gap-3 px-4 sm:px-6 py-4 border-b border-black/6">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            {/* Mode tabs */}
             <div className="flex gap-1 bg-black/5 rounded-xl p-1">
-              {(["daily", "weekly", "monthly"] as Period[]).map((p) => (
+              {(
+                [
+                  { key: "overview", label: "Overview", icon: <Layers className="w-3.5 h-3.5" /> },
+                  { key: "penjualan", label: "Penjualan", icon: <TrendingUp className="w-3.5 h-3.5" /> },
+                  { key: "jenis", label: "Per Jenis", icon: <BarChart2 className="w-3.5 h-3.5" /> },
+                ] as { key: ChartMode; label: string; icon: React.ReactNode }[]
+              ).map((m) => (
                 <button
-                  key={p}
-                  onClick={() => setPeriod(p)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    period === p
-                      ? "bg-[#003E87] text-white shadow-sm"
+                  key={m.key}
+                  onClick={() => setMode(m.key)}
+                  className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all ${
+                    mode === m.key
+                      ? "bg-white text-[#000000] shadow-sm"
                       : "text-[#6B7280] hover:text-[#000000]"
                   }`}
                 >
-                  {PERIOD_LABELS[p]}
+                  {m.icon}
+                  <span className="hidden xs:inline sm:inline">{m.label}</span>
                 </button>
               ))}
             </div>
 
-            {/* Refresh */}
-            <button
-              onClick={fetchData}
-              className="w-8 h-8 rounded-xl bg-black/5 hover:bg-black/10 flex items-center justify-center transition-colors"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 text-[#6B7280] ${loading ? "animate-spin" : ""}`} strokeWidth={2} />
-            </button>
+            <div className="flex items-center gap-2">
+              {/* Period toggle */}
+              <div className="flex gap-1 bg-black/5 rounded-xl p-1">
+                {(["daily", "weekly", "monthly"] as Period[]).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPeriod(p)}
+                    className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all ${
+                      period === p
+                        ? "bg-[#003E87] text-white shadow-sm"
+                        : "text-[#6B7280] hover:text-[#000000]"
+                    }`}
+                  >
+                    {p === "daily" ? "Harian" : p === "weekly" ? "Minggu" : "Bulan"}
+                  </button>
+                ))}
+              </div>
+
+              {/* Refresh */}
+              <button
+                onClick={fetchData}
+                className="w-8 h-8 rounded-xl bg-black/5 hover:bg-black/10 flex items-center justify-center transition-colors"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 text-[#6B7280] ${loading ? "animate-spin" : ""}`} strokeWidth={2} />
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Chart area */}
-        <div className="px-6 py-6">
+        <div className="px-3 sm:px-6 py-4 sm:py-6">
           <AnimatePresence mode="wait">
             {loading ? (
               <motion.div

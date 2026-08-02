@@ -48,7 +48,7 @@ export default function WasteSummaryCards({ perType, totalKg, totalBuyValue }: W
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45 }}
-      className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5"
+      className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5"
     >
       {/* Summary stats */}
       <div className="lg:col-span-1 flex flex-col gap-3">
@@ -109,7 +109,7 @@ export default function WasteSummaryCards({ perType, totalKg, totalBuyValue }: W
       </div>
 
       {/* Bar chart */}
-      <div className="lg:col-span-2 card p-6">
+      <div className="md:col-span-2 card p-4 sm:p-6">
         <p className="text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-1">Distribusi Berat per Jenis Sampah</p>
         <p className="text-xs text-[#6B7280] mb-4">Total kilogram terkumpul sejak program dimulai</p>
         {chartData.length === 0 ? (
@@ -117,28 +117,35 @@ export default function WasteSummaryCards({ perType, totalKg, totalBuyValue }: W
             Belum ada data setoran
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
-              <XAxis
-                dataKey="waste_type_name"
-                tick={{ fontSize: 11, fill: "#6B7280" }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                tick={{ fontSize: 11, fill: "#6B7280" }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(v) => `${v} kg`}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="total_kg" radius={[8, 8, 0, 0]} maxBarSize={60}>
-                {chartData.map((d) => (
-                  <Cell key={d.waste_type_name} fill={d.color} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="h-44 sm:h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} margin={{ top: 4, right: 4, left: -8, bottom: 24 }}>
+                <XAxis
+                  dataKey="waste_type_name"
+                  tick={{ fontSize: 10, fill: "#6B7280" }}
+                  axisLine={false}
+                  tickLine={false}
+                  angle={-30}
+                  textAnchor="end"
+                  interval={0}
+                  height={48}
+                />
+                <YAxis
+                  tick={{ fontSize: 10, fill: "#6B7280" }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v) => `${v}kg`}
+                  width={36}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="total_kg" radius={[8, 8, 0, 0]} maxBarSize={60}>
+                  {chartData.map((d) => (
+                    <Cell key={d.waste_type_name} fill={d.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         )}
       </div>
     </motion.div>

@@ -184,13 +184,13 @@ export default function KeuanganTransparansi({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {/* Kas balance card */}
           <div className="lg:col-span-1 flex flex-col gap-3">
             {/* Kas saldo */}
             <div className="card p-5 bg-gradient-to-br from-[#003E87] to-[#002d65] text-white">
               <p className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-2">Saldo Kas Bank Sampah</p>
-              <p className="text-3xl font-extrabold">Rp {kasBalance.toLocaleString("id-ID")}</p>
+              <p className="text-xl sm:text-3xl font-extrabold break-all">Rp {kasBalance.toLocaleString("id-ID")}</p>
               <p className="text-xs text-white/50 mt-1">Akumulasi surplus dari semua penjualan ke pengepul</p>
             </div>
 
@@ -252,7 +252,7 @@ export default function KeuanganTransparansi({
                         {pending.map((tx) => {
                           const estimatedSurplus = (tx.sell_price_per_kg - tx.buy_price_per_kg) * tx.weight_kg;
                           return (
-                            <div key={tx.id} className="flex items-center gap-3 px-5 py-4 hover:bg-black/2 transition-colors">
+                            <div key={tx.id} className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 sm:px-5 py-4 hover:bg-black/2 transition-colors">
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-semibold text-[#000000] truncate">{tx.waste_type_name}</p>
                                 <p className="text-xs text-[#6B7280]">
@@ -262,17 +262,19 @@ export default function KeuanganTransparansi({
                                   {format(new Date(tx.created_at), "d MMM yyyy, HH:mm", { locale: idLocale })}
                                 </p>
                               </div>
-                              <div className="text-right mr-3 shrink-0">
-                                <p className="text-[10px] text-[#6B7280]">Est. surplus</p>
-                                <p className="text-sm font-bold text-[#22C55E]">+Rp {estimatedSurplus.toLocaleString("id-ID")}</p>
+                              <div className="flex items-center justify-between sm:justify-end gap-3">
+                                <div className="text-left sm:text-right">
+                                  <p className="text-[10px] text-[#6B7280]">Est. surplus</p>
+                                  <p className="text-sm font-bold text-[#22C55E]">+Rp {estimatedSurplus.toLocaleString("id-ID")}</p>
+                                </div>
+                                <button
+                                  onClick={() => setSellTx(tx)}
+                                  className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#003E87] text-white text-xs font-semibold hover:bg-[#002d65] transition-colors whitespace-nowrap"
+                                >
+                                  <ChevronDown className="w-3 h-3 rotate-[-90deg]" strokeWidth={2.5} />
+                                  Jual
+                                </button>
                               </div>
-                              <button
-                                onClick={() => setSellTx(tx)}
-                                className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#003E87] text-white text-xs font-semibold hover:bg-[#002d65] transition-colors whitespace-nowrap"
-                              >
-                                <ChevronDown className="w-3 h-3 rotate-[-90deg]" strokeWidth={2.5} />
-                                Jual
-                              </button>
                             </div>
                           );
                         })}
@@ -297,20 +299,20 @@ export default function KeuanganTransparansi({
                           <span className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider text-right">Saldo Kas</span>
                         </div>
                         {kasHistory.map((k) => (
-                          <div key={k.id} className="grid sm:grid-cols-[auto,1fr,auto,auto] gap-2 sm:gap-3 px-5 py-3.5 hover:bg-black/2 items-center transition-colors">
-                            <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${k.type === "pemasukan" ? "bg-[#22C55E]/12 text-[#16A34A]" : "bg-red-50 text-red-500"}`}>
-                              {k.type === "pemasukan" ? "Masuk" : "Keluar"}
+                          <div key={k.id} className="flex flex-col sm:grid sm:grid-cols-[auto,1fr,auto,auto] gap-1.5 sm:gap-3 px-4 sm:px-5 py-3 sm:py-3.5 hover:bg-black/2 items-start sm:items-center transition-colors border-b border-black/4 last:border-0">
+                            <span className={`text-[10px] font-bold px-2 py-1 rounded-full self-start ${k.type === "pemasukan" ? "bg-[#22C55E]/12 text-[#16A34A]" : "bg-red-50 text-red-500"}`}>
+                              {k.type === "pemasukan" ? "↑ Masuk" : "↓ Keluar"}
                             </span>
                             <div className="min-w-0">
-                              <p className="text-xs font-medium text-[#000000] truncate">{k.description}</p>
+                              <p className="text-xs font-medium text-[#000000]">{k.description}</p>
                               <p className="text-[10px] text-[#6B7280]">{format(new Date(k.created_at), "d MMM yyyy, HH:mm", { locale: idLocale })}</p>
                             </div>
-                            <span className={`text-sm font-bold text-right ${k.type === "pemasukan" ? "text-[#22C55E]" : "text-red-500"}`}>
-                              {k.type === "pemasukan" ? "+" : "-"}Rp {k.amount.toLocaleString("id-ID")}
-                            </span>
-                            <span className="text-sm font-bold text-[#000000] text-right">
-                              Rp {k.balance_after.toLocaleString("id-ID")}
-                            </span>
+                            <div className="flex sm:contents items-center justify-between w-full sm:w-auto gap-2">
+                              <span className={`text-sm font-bold ${k.type === "pemasukan" ? "text-[#22C55E]" : "text-red-500"}`}>
+                                {k.type === "pemasukan" ? "+" : "-"}Rp {k.amount.toLocaleString("id-ID")}
+                              </span>
+                              <span className="text-xs text-[#6B7280]">Saldo: <span className="font-bold text-[#000000]">Rp {k.balance_after.toLocaleString("id-ID")}</span></span>
+                            </div>
                           </div>
                         ))}
                       </div>

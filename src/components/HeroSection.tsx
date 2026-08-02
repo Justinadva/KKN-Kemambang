@@ -85,7 +85,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.22 }}
-            className="grid grid-cols-2 sm:grid-cols-4 gap-3"
+            className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3"
           >
             {stats.map((stat, i) => {
               const Icon = stat.icon;
@@ -221,16 +221,18 @@ export default function HeroSection() {
         transition={{ delay: 0.5 }}
         className="relative z-10 mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2"
       >
-        <div className="flex items-center gap-2 text-white/70 text-xs">
-          <TrendingUp className="w-3.5 h-3.5" strokeWidth={2} />
-          <span>Produksi bulan ini: <strong className="text-white">312 kWh</strong></span>
-          <span className="text-white/40">|</span>
-          <Leaf className="w-3.5 h-3.5 text-green-400" strokeWidth={2} />
-          <span>Bank Sampah aktif: <strong className="text-white">87 anggota</strong></span>
-        </div>
-        <div className="flex items-center gap-2 text-white/70 text-xs">
-          <span>Terakhir diperbarui:</span>
-          <span className="font-semibold text-white">Hari ini, 21:43 WIB</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 text-white/70 text-xs">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <TrendingUp className="w-3.5 h-3.5" strokeWidth={2} />
+            <span>Produksi bulan ini: <strong className="text-white">312 kWh</strong></span>
+            <span className="text-white/40 hidden sm:inline">|</span>
+            <Leaf className="w-3.5 h-3.5 text-green-400" strokeWidth={2} />
+            <span>Bank Sampah aktif: <strong className="text-white">87 anggota</strong></span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>Terakhir diperbarui:</span>
+            <span className="font-semibold text-white">Hari ini, 21:43 WIB</span>
+          </div>
         </div>
       </motion.div>
     </div>

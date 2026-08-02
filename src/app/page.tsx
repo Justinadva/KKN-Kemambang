@@ -225,7 +225,7 @@ export default function Home() {
                       Ringkasan Bank Sampah
                     </span>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
                       {[
                         { label: "Total Setoran", value: `${(summary?.totals?.total_kg ?? 0).toFixed(1)} kg`, color: "#003E87" },
                         { label: "Total ke Anggota", value: `Rp ${(summary?.totals?.total_buy_value ?? 0).toLocaleString("id-ID")}`, color: "#22C55E" },
@@ -234,11 +234,11 @@ export default function Home() {
                       ].map((item) => (
                         <div
                           key={item.label}
-                          className="rounded-2xl p-4"
+                          className="rounded-2xl p-3 sm:p-4"
                           style={{ background: `color-mix(in srgb, ${item.color} 8%, white)` }}
                         >
-                          <p className="text-[10px] text-[#6B7280] font-medium mb-1">{item.label}</p>
-                          <p className="text-base font-bold" style={{ color: item.color }}>
+                          <p className="text-[10px] text-[#6B7280] font-medium mb-1 leading-tight">{item.label}</p>
+                          <p className="text-sm sm:text-base font-bold break-all" style={{ color: item.color }}>
                             {item.value}
                           </p>
                         </div>
@@ -254,8 +254,8 @@ export default function Home() {
                         {/* Header */}
                         <div className="flex items-center px-2 py-1.5 text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider border-b border-black/6">
                           <span className="flex-1">Jenis</span>
-                          <span className="w-24 text-right">Beli Warga</span>
-                          <span className="w-24 text-right">Jual Pengepul</span>
+                          <span className="w-20 text-right">Beli</span>
+                          <span className="w-20 text-right">Jual</span>
                         </div>
                         {(summary?.perType ?? []).length === 0 && (
                           <p className="text-xs text-[#6B7280] py-3 text-center">Belum ada data</p>
