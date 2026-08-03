@@ -7,10 +7,10 @@ const PUBLIC_PATHS = ["/login", "/api/auth", "/_next", "/favicon.ico", "/logo-kk
 // API bank sampah — hanya bank_sampah & admin
 const BANK_SAMPAH_APIS = ["/api/transactions", "/api/waste-types", "/api/summary", "/api/chart-data"];
 
-// API PLTS — hanya plts & admin  
+// API PLTS — hanya plts & admin
 const PLTS_APIS = ["/api/iot-data"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Lewati public paths
@@ -30,7 +30,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Validasi signature HMAC (Web Crypto — edge-compatible)
+  // Validasi signature HMAC
   const secret = process.env.SESSION_SECRET ?? "fallback-secret";
   const valid = await verifyHMAC(roleRaw, sigRaw, secret);
 
@@ -55,7 +55,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden: Akses ditolak untuk role Bank Sampah" }, { status: 403 });
   }
 
-  // Teruskan request + tambahkan header role untuk dipakai di API
+  // Teruskan request + tambahkan header role
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-user-role", role);
 
@@ -72,7 +72,11 @@ async function verifyHMAC(value: string, signature: string, secret: string): Pro
       false, ["sign", "verify"]
     );
     const sigBytes = hexToBytes(signature);
-    return await crypto.subtle.verify("HMAC", key, sigBytes.buffer as ArrayBuffer, enc.encode(value).buffer as ArrayBuffer);
+    return await crypto.subtle.verify(
+      "HMAC", key,
+      sigBytes.buffer as ArrayBuffer,
+      enc.encode(value).buffer as ArrayBuffer
+    );
   } catch {
     return false;
   }
@@ -87,5 +91,5 @@ function hexToBytes(hex: string): Uint8Array {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|logo-kknt.png|logo-kknt.svg|sw.js|icons).*)"],
+  match: ["/((?!_next/static|_next/image|favicon.ico|logo-kknt.png|logo-kknt.svg|sw.js|icons).*)"],
 };
