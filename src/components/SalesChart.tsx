@@ -156,42 +156,53 @@ export default function SalesChart({ refreshKey }: { refreshKey: number }) {
   // Overview: merge setoran + penjualan by period label
   const overviewData = (() => {
     if (!data) return [];
-    const map = new Map<string, { label: string; setoran_kg: number; penjualan_kg: number; surplus: number }>();
+    // Use ISO key for sorting, label for display
+    const map = new Map<string, { isoKey: string; label: string; setoran_kg: number; penjualan_kg: number; surplus: number }>();
     data.setoran.forEach((r) => {
       const k = r.period_start;
       const label = formatPeriod(r.period_start, period);
-      if (!map.has(k)) map.set(k, { label, setoran_kg: 0, penjualan_kg: 0, surplus: 0 });
+      if (!map.has(k)) map.set(k, { isoKey: k, label, setoran_kg: 0, penjualan_kg: 0, surplus: 0 });
       map.get(k)!.setoran_kg += r.total_kg;
     });
     data.penjualan.forEach((r) => {
       const k = r.period_start;
       const label = formatPeriod(r.period_start, period);
-      if (!map.has(k)) map.set(k, { label, setoran_kg: 0, penjualan_kg: 0, surplus: 0 });
+      if (!map.has(k)) map.set(k, { isoKey: k, label, setoran_kg: 0, penjualan_kg: 0, surplus: 0 });
       map.get(k)!.penjualan_kg += r.total_kg;
       map.get(k)!.surplus += r.total_surplus ?? 0;
     });
-    return Array.from(map.values()).sort((a, b) => a.label.localeCompare(b.label));
+    // Sort chronologically using the original ISO timestamp
+    return Array.from(map.values())
+      .sort((a, b) => a.isoKey.localeCompare(b.isoKey))
+      .map(({ label, setoran_kg, penjualan_kg, surplus }) => ({ label, setoran_kg, penjualan_kg, surplus }));
   })();
 
-  // Penjualan chart
-  const penjualanData = (data?.penjualan ?? []).map((r) => ({
-    label: formatPeriod(r.period_start, period),
-    "Volume (kg)": r.total_kg,
-    "Total Penjualan": r.total_penjualan,
-    "Surplus Kas": r.total_surplus ?? 0,
-  }));
+  // Penjualan chart — already sorted ASC from API
+  const penjualanData = (data?.penjualan ?? [])
+    .slice() // don't mutate
+    .sort((a, b) => a.period_start.localeCompare(b.period_start))
+    .map((r) => ({
+      label: formatPeriod(r.period_start, period),
+      "Volume (kg)": r.total_kg,
+      "Total Penjualan": r.total_penjualan,
+      "Surplus Kas": r.total_surplus ?? 0,
+    }));
 
   // Per-jenis stacked chart
   const jenisNames = [...new Set((data?.perJenis ?? []).map((r) => r.waste_type_name))];
   const jenisData = (() => {
-    const map = new Map<string, Record<string, number>>();
+    // Use ISO key → label map for chronological ordering
+    const map = new Map<string, Record<string, number | string>>();
     (data?.perJenis ?? []).forEach((r) => {
-      const label = formatPeriod(r.period_start, period);
-      if (!map.has(label)) map.set(label, { label: 0 as unknown as number }); // hack
-      const entry = map.get(label)!;
-      entry[r.waste_type_name] = (entry[r.waste_type_name] ?? 0) + r.total_kg;
+      const isoKey = r.period_start;
+      if (!map.has(isoKey)) map.set(isoKey, { _iso: isoKey, label: formatPeriod(isoKey, period) });
+      const entry = map.get(isoKey)!;
+      const current = typeof entry[r.waste_type_name] === "number" ? (entry[r.waste_type_name] as number) : 0;
+      entry[r.waste_type_name] = current + r.total_kg;
     });
-    return Array.from(map.entries()).map(([label, vals]) => ({ label, ...vals }));
+    return Array.from(map.values())
+      .sort((a, b) => (a._iso as string).localeCompare(b._iso as string))
+      .map(({ _iso, ...rest }) => rest); // strip _iso before passing to recharts
   })();
 
   const isEmpty =

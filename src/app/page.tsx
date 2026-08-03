@@ -338,13 +338,14 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-black/5 py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="text-xs text-[#6B7280]">
-            © 2026 KKN-T 40 Kemambang · DEB Kembara — Dashboard PLTS &amp; Bank Sampah
-          </p>
-          <p className="text-xs text-[#6B7280]">
-            Diperbarui otomatis setiap 5 menit · v2.0.0
+      <footer className="bg-white border-t border-black/5 py-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center gap-2 flex-wrap">
+          <p className="text-[11px] text-[#6B7280] text-center">
+            © 2026 KKN-T 40 · DEB Kembara
+            <span className="mx-1.5 text-black/20">·</span>
+            PLTS &amp; Bank Sampah
+            <span className="hidden sm:inline mx-1.5 text-black/20">·</span>
+            <span className="hidden sm:inline">v2.0.0</span>
           </p>
         </div>
       </footer>
