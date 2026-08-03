@@ -64,5 +64,20 @@ export async function POST(
     )
   `;
 
+  // 🔔 Push notification ke admin: penjualan berhasil
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    await fetch(`${baseUrl}/api/push/send`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: "💰 Penjualan ke Pengepul Berhasil!",
+        body: `${tx.waste_type_name} ${tx.weight_kg}kg terjual. Surplus +Rp ${surplus_to_kas.toLocaleString("id-ID")} masuk kas.`,
+        tag: "penjualan-pengepul",
+        targetRole: "admin",
+      }),
+    });
+  } catch { /* best-effort */ }
+
   return NextResponse.json({ transaction: updated, surplus_to_kas, new_kas_balance: newBalance });
 }

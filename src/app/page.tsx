@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import BankSampahCalculator, { ActivityEntry } from "@/components/BankSampahCalculator";
@@ -53,13 +54,34 @@ interface SummaryData {
 }
 
 type ActiveTab = "plts" | "bank-sampah";
+type Role = "plts" | "bank_sampah" | "admin";
 
 export default function Home() {
+  const router = useRouter();
+  const [role, setRole] = useState<Role>("admin");
+  const [roleLoading, setRoleLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<ActiveTab>("plts");
   const [activityEntries, setActivityEntries] = useState<ActivityEntry[]>([]);
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(true);
   const [chartRefreshKey, setChartRefreshKey] = useState(0);
+
+  // Fetch current user role
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.role) { router.push("/login"); return; }
+        const r = data.role as Role;
+        setRole(r);
+        // Auto-set tab based on role
+        if (r === "plts") setActiveTab("plts");
+        else if (r === "bank_sampah") setActiveTab("bank-sampah");
+        else setActiveTab("plts"); // admin default
+      })
+      .catch(() => router.push("/login"))
+      .finally(() => setRoleLoading(false));
+  }, [router]);
 
   // Load PLTS from localStorage on mount; seed energi entries if empty
   useEffect(() => {
@@ -98,6 +120,18 @@ export default function Home() {
     // Refresh summary + chart after new deposit
     fetchSummary();
     setChartRefreshKey((k) => k + 1);
+    // Send push notification to bank_sampah subscribers
+    fetch("/api/push/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: "♻️ Setoran Baru Masuk!",
+        body: entry.description,
+        tag: "setor-sampah",
+        url: "/?tab=bank-sampah",
+        targetRole: "bank_sampah",
+      }),
+    }).catch(console.error);
   }, [fetchSummary]);
 
   const handleClearLog = useCallback(() => {
@@ -114,9 +148,21 @@ export default function Home() {
     setActiveTab(tab as ActiveTab);
   }, []);
 
+  // Show loading while role is being determined
+  if (roleLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#001F44] to-[#003E87] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+          <p className="text-white/60 text-sm">Memuat dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
-      <Navbar activeTab={activeTab} onTabChange={handleTabChange} />
+      <Navbar activeTab={activeTab} onTabChange={handleTabChange} role={role} />
 
       {/* Main content */}
       <main className="pt-20 pb-16 min-h-screen bg-[#F8F9FA]">

@@ -186,7 +186,7 @@ export default function KeuanganTransparansi({
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {/* Kas balance card */}
-          <div className="lg:col-span-1 flex flex-col gap-3">
+          <div className="md:col-span-1 flex flex-col gap-3">
             {/* Kas saldo */}
             <div className="card p-5 bg-gradient-to-br from-[#003E87] to-[#002d65] text-white">
               <p className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-2">Saldo Kas Bank Sampah</p>
@@ -218,7 +218,7 @@ export default function KeuanganTransparansi({
           </div>
 
           {/* Pending sales + kas history */}
-          <div className="lg:col-span-2 card overflow-hidden">
+          <div className="md:col-span-2 card overflow-hidden">
             {/* Tab toggle */}
             <div className="flex border-b border-black/6">
               <button

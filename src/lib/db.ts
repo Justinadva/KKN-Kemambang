@@ -49,6 +49,18 @@ export async function initDB() {
     )
   `;
 
+  await sql`
+    CREATE TABLE IF NOT EXISTS push_subscriptions (
+      id         SERIAL PRIMARY KEY,
+      endpoint   TEXT NOT NULL UNIQUE,
+      p256dh     TEXT NOT NULL,
+      auth       TEXT NOT NULL,
+      role       VARCHAR(20) NOT NULL DEFAULT 'unknown',
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
   // Seed default waste types if empty
   const existing = await sql`SELECT id FROM waste_types LIMIT 1`;
   if (existing.length === 0) {
