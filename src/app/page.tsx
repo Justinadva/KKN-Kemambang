@@ -218,114 +218,113 @@ export default function Home() {
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
-                {/* Page header */}
-                <div className="mb-6">
-                  <motion.div
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4 }}
-                    className="flex items-center gap-3"
-                  >
-                    <div className="h-1 w-8 bg-[#003E87] rounded-full" />
-                    <h1 className="text-2xl font-extrabold text-[#000000]">Bank Sampah</h1>
-                  </motion.div>
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                    className="mt-1.5 text-sm text-[#6B7280] ml-11"
-                  >
-                    Manajemen setoran, transparansi kas, dan statistik sampah terkumpul — KKN-T 40 Kemambang.
-                  </motion.p>
-                </div>
+                {/* ── HERO HEADER ── */}
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#003E87] via-[#004fa8] to-[#0062d4] p-6 sm:p-8 mb-7 text-white"
+                >
+                  {/* BG decoration */}
+                  <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/3" />
+                  <div className="absolute bottom-0 left-1/3 w-40 h-40 rounded-full bg-[#FED501]/10 translate-y-1/2" />
 
-                {/* ── SUMMARY CHARTS ── */}
-                {summaryLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="w-6 h-6 border-2 border-[#003E87] border-t-transparent rounded-full animate-spin" />
+                  <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-2xl">♻️</span>
+                        <h1 className="text-xl sm:text-2xl font-extrabold">Bank Sampah</h1>
+                      </div>
+                      <p className="text-white/65 text-sm max-w-sm">
+                        Manajemen setoran, kas, dan statistik sampah — KKN-T 40 Kemambang
+                      </p>
+                    </div>
+
+                    {/* Quick stats */}
+                    <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 min-w-[240px]">
+                      {[
+                        { label: "Total Sampah", value: `${(summary?.totals?.total_kg ?? 0).toFixed(1)} kg`, icon: "⚖️" },
+                        { label: "Dana Warga", value: `Rp ${((summary?.totals?.total_buy_value ?? 0) / 1000).toFixed(0)}k`, icon: "💵" },
+                        { label: "Transaksi", value: `${summary?.totals?.transaction_count ?? 0}×`, icon: "📋" },
+                        { label: "Surplus Kas", value: `Rp ${((summary?.totals?.total_surplus ?? 0) / 1000).toFixed(0)}k`, icon: "💰" },
+                      ].map((s) => (
+                        <div key={s.label} className="bg-white/12 backdrop-blur-sm rounded-2xl px-3 py-2.5 border border-white/15">
+                          <p className="text-white/60 text-[10px] font-medium">{s.icon} {s.label}</p>
+                          <p className="text-white font-bold text-sm mt-0.5">{s.value}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ) : (
-                  <WasteSummaryCards
-                    perType={summary?.perType ?? []}
-                    totalKg={summary?.totals?.total_kg ?? 0}
-                    totalBuyValue={summary?.totals?.total_buy_value ?? 0}
-                  />
-                )}
+                </motion.div>
 
-                {/* ── CALCULATOR + HARGA GUIDE ── */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-2">
-                  {/* Kalkulator */}
+                {/* ── KALKULATOR SETORAN (full width, prominent) ── */}
+                <div className="mb-7">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-1 w-8 bg-[#FED501] rounded-full" />
+                    <h2 className="text-base font-bold text-[#000000]">Setoran Sampah</h2>
+                    <div className="h-px flex-1 bg-black/6 hidden sm:block" />
+                    <span className="text-xs text-[#6B7280] bg-[#FED501]/15 px-2.5 py-1 rounded-full font-medium">Formulir Setor</span>
+                  </div>
                   <BankSampahCalculator
                     onSetor={handleSetor}
                     onTypesChanged={fetchSummary}
                   />
+                </div>
 
-                  {/* Ringkasan card */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 24 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.45, delay: 0.15 }}
-                    className="card p-6 flex flex-col gap-5"
-                  >
-                    <span className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                      Ringkasan Bank Sampah
-                    </span>
+                {/* ── STATISTIK VISUAL ── */}
+                <div className="mb-7">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-1 w-8 bg-[#003E87] rounded-full" />
+                    <h2 className="text-base font-bold text-[#000000]">Statistik & Grafik</h2>
+                    <div className="h-px flex-1 bg-black/6 hidden sm:block" />
+                  </div>
 
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                      {[
-                        { label: "Total Setoran", value: `${(summary?.totals?.total_kg ?? 0).toFixed(1)} kg`, color: "#003E87" },
-                        { label: "Total ke Anggota", value: `Rp ${(summary?.totals?.total_buy_value ?? 0).toLocaleString("id-ID")}`, color: "#22C55E" },
-                        { label: "Jumlah Transaksi", value: `${summary?.totals?.transaction_count ?? 0}×`, color: "#8B5CF6" },
-                        { label: "Surplus Terealisasi", value: `Rp ${(summary?.totals?.total_surplus ?? 0).toLocaleString("id-ID")}`, color: "#F59E0B" },
-                      ].map((item) => (
-                        <div
-                          key={item.label}
-                          className="rounded-2xl p-3 sm:p-4"
-                          style={{ background: `color-mix(in srgb, ${item.color} 8%, white)` }}
-                        >
-                          <p className="text-[10px] text-[#6B7280] font-medium mb-1 leading-tight">{item.label}</p>
-                          <p className="text-sm sm:text-base font-bold break-all" style={{ color: item.color }}>
-                            {item.value}
-                          </p>
-                        </div>
-                      ))}
+                  {summaryLoading ? (
+                    <div className="flex items-center justify-center py-16 card">
+                      <div className="w-6 h-6 border-2 border-[#003E87] border-t-transparent rounded-full animate-spin" />
                     </div>
-
-                    {/* Price guide — now from DB */}
-                    <div>
-                      <p className="text-xs font-semibold text-[#6B7280] mb-3">
-                        Harga Aktif (dari database)
-                      </p>
-                      <div className="flex flex-col gap-0">
-                        {/* Header */}
-                        <div className="flex items-center px-2 py-1.5 text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider border-b border-black/6">
-                          <span className="flex-1">Jenis</span>
-                          <span className="w-20 text-right">Beli</span>
-                          <span className="w-20 text-right">Jual</span>
-                        </div>
-                        {(summary?.perType ?? []).length === 0 && (
-                          <p className="text-xs text-[#6B7280] py-3 text-center">Belum ada data</p>
-                        )}
+                  ) : (
+                    <>
+                      <WasteSummaryCards
+                        perType={summary?.perType ?? []}
+                        totalKg={summary?.totals?.total_kg ?? 0}
+                        totalBuyValue={summary?.totals?.total_buy_value ?? 0}
+                      />
+                      <div className="mt-5">
+                        <SalesChart refreshKey={chartRefreshKey} />
                       </div>
-                    </div>
-                  </motion.div>
+                    </>
+                  )}
                 </div>
 
                 {/* ── TRANSPARANSI KEUANGAN ── */}
-                {!summaryLoading && summary && (
-                  <KeuanganTransparansi
-                    kasBalance={summary.kas_balance}
-                    totalSurplus={summary.totals?.total_surplus ?? 0}
-                    pending={summary.pending}
-                    kasHistory={summary.kasHistory}
-                    onSellSuccess={() => { fetchSummary(); setChartRefreshKey((k) => k + 1); }}
-                  />
-                )}
+                <div className="mb-7">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-1 w-8 bg-[#22C55E] rounded-full" />
+                    <h2 className="text-base font-bold text-[#000000]">Transparansi Keuangan</h2>
+                    <div className="h-px flex-1 bg-black/6 hidden sm:block" />
+                    <span className="text-xs text-[#6B7280] bg-[#22C55E]/12 px-2.5 py-1 rounded-full font-medium text-[#15803D]">Kas Real-time</span>
+                  </div>
+                  {!summaryLoading && summary ? (
+                    <KeuanganTransparansi
+                      kasBalance={summary.kas_balance}
+                      totalSurplus={summary.totals?.total_surplus ?? 0}
+                      pending={summary.pending}
+                      kasHistory={summary.kasHistory}
+                      onSellSuccess={() => { fetchSummary(); setChartRefreshKey((k) => k + 1); }}
+                    />
+                  ) : (
+                    <div className="card flex items-center justify-center py-12">
+                      <div className="w-6 h-6 border-2 border-[#22C55E] border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
+                </div>
 
-                {/* ── GRAFIK PENJUALAN ── */}
-                <SalesChart refreshKey={chartRefreshKey} />
-
-                {/* ── LOG SETORAN ── */}
+                {/* ── LOG AKTIVITAS ── */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-1 w-8 bg-[#8B5CF6] rounded-full" />
+                  <h2 className="text-base font-bold text-[#000000]">Log Aktivitas Setoran</h2>
+                  <div className="h-px flex-1 bg-black/6 hidden sm:block" />
+                </div>
                 <ActivityLog
                   entries={activityEntries}
                   activeTab="bank-sampah"

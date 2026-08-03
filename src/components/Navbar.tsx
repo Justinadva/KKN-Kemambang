@@ -3,16 +3,16 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { LogOut, Zap, Recycle, Menu, X, ShieldCheck } from "lucide-react";
+import { LogOut, Zap, Recycle, Menu, X, Crown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import PushNotificationManager from "./PushNotificationManager";
 
 type Role = "plts" | "bank_sampah" | "admin";
 
-const ROLE_META: Record<Role, { label: string; icon: React.FC<{ className?: string }>; color: string; bg: string }> = {
-  plts:        { label: "Operator PLTS",     icon: ({ className }) => <Zap className={className} />,        color: "#D97706", bg: "bg-[#FED501]/15" },
-  bank_sampah: { label: "Pengurus Bank Sampah", icon: ({ className }) => <Recycle className={className} />, color: "#16A34A", bg: "bg-[#22C55E]/12" },
-  admin:       { label: "Admin / Koordinator",  icon: ({ className }) => <ShieldCheck className={className} />, color: "#003E87", bg: "bg-[#003E87]/10" },
+const ROLE_META: Record<Role, { label: string; color: string; bg: string; textColor: string }> = {
+  plts:        { label: "Operator PLTS",       color: "#B45309", bg: "bg-[#FED501]/15", textColor: "text-[#B45309]" },
+  bank_sampah: { label: "Pengurus Bank Sampah", color: "#15803D", bg: "bg-[#22C55E]/12", textColor: "text-[#15803D]" },
+  admin:       { label: "Admin",                color: "#003E87", bg: "bg-[#003E87]/10", textColor: "text-[#003E87]" },
 };
 
 const ALL_NAV_ITEMS = [
@@ -31,10 +31,14 @@ export default function Navbar({ activeTab, onTabChange, role }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  // Filter nav items based on role
   const visibleItems = ALL_NAV_ITEMS.filter((item) => item.roles.includes(role));
   const meta = ROLE_META[role];
-  const RoleIcon = meta.icon;
+
+  const RoleBadgeIcon = () => {
+    if (role === "plts") return <span className="text-[11px]">⚡</span>;
+    if (role === "bank_sampah") return <span className="text-[11px]">♻️</span>;
+    return <Crown className="w-3 h-3" />;
+  };
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -44,22 +48,21 @@ export default function Navbar({ activeTab, onTabChange, role }: NavbarProps) {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-black/5 shadow-sm">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/92 backdrop-blur-md border-b border-black/5 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
           {/* ── Logo & Branding ── */}
           <div className="flex items-center gap-3 min-w-fit">
-            <div className="relative w-10 h-10 rounded-full overflow-hidden ring-2 ring-[#003E87]/20 flex-shrink-0">
+            <div className="relative w-10 h-10 rounded-full overflow-hidden ring-2 ring-[#003E87]/15 flex-shrink-0 bg-white">
               <Image
                 src="/logo-kknt.png"
-                alt="Logo KKN-T 40 Kemambang"
-                fill sizes="40px"
-                className="object-cover"
-                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                alt="Logo DEB Kembara"
+                fill
+                sizes="40px"
+                className="object-contain p-0.5 z-10 relative"
                 priority
               />
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#003E87] to-[#0056BE] text-white text-[10px] font-bold select-none">KKN</div>
             </div>
             <div className="hidden sm:flex flex-col">
               <span className="text-sm font-bold text-[#003E87] leading-tight tracking-tight">DEB Kembara</span>
@@ -67,7 +70,7 @@ export default function Navbar({ activeTab, onTabChange, role }: NavbarProps) {
             </div>
           </div>
 
-          {/* ── Desktop Nav (filtered by role) ── */}
+          {/* ── Desktop Nav ── */}
           <nav className="hidden md:flex items-center gap-1 bg-black/4 rounded-full p-1">
             {visibleItems.map((item) => {
               const Icon = item.icon;
@@ -97,13 +100,12 @@ export default function Navbar({ activeTab, onTabChange, role }: NavbarProps) {
 
           {/* ── Right controls ── */}
           <div className="flex items-center gap-2">
-            {/* Push Notification Bell */}
             <PushNotificationManager role={role} />
 
             {/* Role badge */}
             <div className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg ${meta.bg}`}>
-              <span style={{ color: meta.color }}><RoleIcon className="w-3.5 h-3.5" /></span>
-              <span className="text-[11px] font-semibold" style={{ color: meta.color }}>{meta.label}</span>
+              <span className={meta.textColor}><RoleBadgeIcon /></span>
+              <span className={`text-[11px] font-semibold ${meta.textColor}`}>{meta.label}</span>
             </div>
 
             {/* Logout */}
@@ -144,7 +146,7 @@ export default function Navbar({ activeTab, onTabChange, role }: NavbarProps) {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="md:hidden border-t border-black/5 bg-white"
+            className="md:hidden border-t border-black/5 bg-white/95 backdrop-blur-md"
           >
             <div className="px-4 py-3 space-y-1">
               {visibleItems.map((item) => {
@@ -163,11 +165,10 @@ export default function Navbar({ activeTab, onTabChange, role }: NavbarProps) {
                   </button>
                 );
               })}
-              {/* Mobile: role info + logout */}
               <div className="pt-2 border-t border-black/5 mt-2">
                 <div className={`flex items-center gap-2 px-4 py-2 rounded-xl ${meta.bg} mb-2`}>
-                  <span style={{ color: meta.color }}><RoleIcon className="w-4 h-4" /></span>
-                  <span className="text-xs font-semibold" style={{ color: meta.color }}>{meta.label}</span>
+                  <span className={meta.textColor}><RoleBadgeIcon /></span>
+                  <span className={`text-xs font-semibold ${meta.textColor}`}>{meta.label}</span>
                 </div>
                 <button
                   onClick={handleLogout}
